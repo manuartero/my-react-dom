@@ -1,28 +1,7 @@
-# my-react-dom
-
-custom tiny react-dom
-
-### Steps
-
-```js
 import ReactReconcilier from "react-reconciler";
 
-// how to talk to the host environment
-const hostConfig = {};
+const DEBUG = false;
 
-const reconciler = ReactReconcilier(hostConfig);
-
-const myReactDOM = {
-  render(what, where) {
-    const container = reconciler.createContainer(where, false, false);
-    reconciler.updateContainer(what, container, null, null);
-  },
-};
-
-export default myReactDOM;
-```
-
-```js
 // how to talk to the host environment
 const hostConfig = {
   now: Date.now,
@@ -32,54 +11,34 @@ const hostConfig = {
   resetAfterCommit: () => {},
   getChildHostContext: () => {},
   shouldSetTextContent: () => {},
-  createInstance: () => {},
-  createTextInstance: () => {},
-  appendInitialChild: () => {},
-  finalizeInitialChildren: () => {},
-  clearContainer: () => {},
-  appendChildToContainer: () => {},
-};
-```
 
-```js
   createInstance: (type, newProps) => {
-    console.log("createInstance()", type, newProps);
-  },
-```
-
-```js
-  createInstance: (type, newProps) => {
-    console.log("createInstance()", type, newProps);
+    if (DEBUG) console.log("createInstance()", { type, newProps });
     const el = document.createElement(type);
-    return { el };
+    if (newProps.onClick) {
+      el.addEventListener("click", newProps.onClick);
+    }
+    return el;
   },
-```
-
-```js
   createTextInstance: (text) => {
-    console.log("createTextInstance()", text);
+    if (DEBUG) console.log("createTextInstance()", text);
+    return document.createTextNode(text);
   },
-```
 
-```js
-  appendInitialChild: (parent, child) => {
-    console.log("appendInitialChild()", { parent, child });
+  appendChild: (parent, child) => {
+    if (DEBUG) console.log("appendChild()", { parent, child });
     parent.appendChild(child);
   },
   appendChildToContainer: (container, child) => {
-    console.log("appendChildToContainer()", { container, child });
+    if (DEBUG) console.log("appendChildToContainer()", { container, child });
     container.appendChild(child);
   },
-  appendChild: (parent, child) => {
-    console.log("appendChild()", { parent, child });
+  appendInitialChild: (parent, child) => {
+    if (DEBUG) console.log("appendInitialChild()", { parent, child });
     parent.appendChild(child);
   },
-```
 
-> NO LISTENERS
-
-```js
- removeChild: (parent, child) => {
+  removeChild: (parent, child) => {
     if (DEBUG) console.log("removeChild()", { parent, child });
     parent.removeChild(child);
   },
@@ -87,9 +46,16 @@ const hostConfig = {
     if (DEBUG) console.log("removeChildFromContainer()", { container, child });
     container.removeChild(child);
   },
-```
+  insertBefore: (parent, child, before) => {
+    if (DEBUG) console.log("insertBefore()", { parent, child, before });
+    parent.insertBefore(child, before);
+  },
+  insertInContainerBefore: (container, child, before) => {
+    if (DEBUG)
+      console.log("insertInContainerBefore()", { container, child, before });
+    container.insertBefore(child, before);
+  },
 
-```js
   prepareUpdate: (instance, type, oldProps, newProps) => {
     if (DEBUG)
       console.log("prepareUpdate()", { instance, type, oldProps, newProps });
@@ -115,4 +81,18 @@ const hostConfig = {
     console.log("commitTextUpdate()", { textInstance, oldText, newText });
     textInstance.nodeValue = newText;
   },
-```
+
+  finalizeInitialChildren: () => {},
+  clearContainer: () => {},
+};
+
+const reconciler = ReactReconcilier(hostConfig);
+
+const myReactDOM = {
+  render(what, where) {
+    const container = reconciler.createContainer(where, false, false);
+    reconciler.updateContainer(what, container, null, null);
+  },
+};
+
+export default myReactDOM;
