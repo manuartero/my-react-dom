@@ -18,6 +18,16 @@ const hostConfig = {
     if (newProps.onClick) {
       el.addEventListener("click", newProps.onClick);
     }
+    if (newProps.className) {
+      el.className = newProps.className;
+    }
+
+    if (newProps.bgColor) {
+      el.style.backgroundColor = newProps.bgColor;
+    }
+    if (newProps.padding) {
+      el.style.padding = newProps.padding + "px";
+    }
     return el;
   },
   createTextInstance: (text) => {
